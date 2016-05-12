@@ -1,0 +1,39 @@
+#
+# Makefile.in
+#
+# Simple logging library.
+#
+# https://github.com/e03213ac/liblog
+#
+# This work belongs to the Public Domain. Everyone is free to use, modify,
+# republish, sell or give away this work without prior consent from
+# anybody.
+#
+# This software is provided on an "AS IS" basis, without warranty of any
+# kind. Use at your own risk! Under no circumstances shall the author(s)
+# or contributor(s) be liable for damages resulting directly or indirectly
+# from the use or non-use of this documentation.
+#
+
+LIBLOG_DIR    := $(dir $(lastword $(MAKEFILE_LIST)))
+LIBLOG_INCDIR := $(LIBLOG_DIR)include/
+LIBLOG_SRCDIR := $(LIBLOG_DIR)src/
+LIBLOG_CFILES := $(wildcard $(LIBLOG_SRCDIR)*.c)
+LIBLOG_CFILES := $(filter-out $(LIBLOG_SRCDIR)json_test.c,$(LIBLOG_CFILES))
+LIBLOG_HFILES := $(wildcard $(LIBLOG_SRCDIR)*.h $(LIBLOG_INCDIR)*.h)
+LIBLOG_OFILES := $(LIBLOG_CFILES:.c=.o)
+LIBLOG        := $(LIBLOG_DIR)liblog.a
+
+$(LIBLOG): $(LIBLOG_OFILES)
+	$(AR) rcs $(@) $(^)
+
+$(LIBLOG_OFILES): CFLAGS += -std=gnu99 -D_GNU_SOURCE
+$(LIBLOG_OFILES): CFLAGS += -iquote$(LIBLOG_SRCDIR) -iquote$(LIBLOG_INCDIR)
+$(LIBLOG_OFILES): $(LIBLOG_HFILES)
+
+.PHONY: clean
+.PHONY: liblog_clean
+clean: liblog_clean
+liblog_clean:
+	rm -f $(LIBLOG_DIR)*.a
+	rm -f $(LIBLOG_SRCDIR)*.o
